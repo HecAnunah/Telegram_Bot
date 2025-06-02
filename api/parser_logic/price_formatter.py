@@ -1,10 +1,11 @@
-from api.price_parser.pars_logic import text_gen
+from api.parser_logic.pars_logic_price import text_gen
+from config_data.config import urls
 
 
 def price_formatter():
     formatted = []
 
-    for line in text_gen():
+    for line in text_gen(urls[0]):
         line = line.strip()
 
         if line.startswith("•"):

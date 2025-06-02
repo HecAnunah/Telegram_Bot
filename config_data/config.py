@@ -15,3 +15,9 @@ DEFAULT_COMMANDS = (
     ("id", "Вывести ID"),
     ("price", "Вывести Прайс-лист"),
 )
+
+# Парсинг дата
+urls = [
+    r"http://www.vetsimba.ru/price/price.html",
+    r"http://www.vetsimba.ru/index.html",
+]

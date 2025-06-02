@@ -3,10 +3,7 @@ import requests
 from utils.misc.my_logger.logger import logger
 
 
-url = r"http://www.vetsimba.ru/price/price.html"
-
-
-def text_gen():
+def text_gen(url):
     for i in range(1, 2):
         urls = url
         logger.info(f"Первый блок: делаю запрос request по {url}")

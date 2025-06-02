@@ -1,6 +1,6 @@
 from telebot.types import Message
 from loader import bot
-from utils.misc.price_formatter import price_formatter
+from api.parser_logic.price_formatter import price_formatter
 
 
 @bot.message_handler(commands=["price"])
