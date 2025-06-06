@@ -1,14 +1,10 @@
 from telebot.types import Message
 from loader import bot
 from api.parser_logic.price_formatter import price_formatter
-from database.user_data import user_registry
 
 
 @bot.message_handler(commands=["price"])
 def bot_info(message: Message):
-    if message.from_user.id not in user_registry:
-        bot.reply_to(message, f"Введите команду /start для знакомства с ботом.")
-        return
     text = price_formatter()
 
     if len(text) > 4000:

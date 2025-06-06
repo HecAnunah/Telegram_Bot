@@ -1,1 +1,0 @@
-user_registry = set()
