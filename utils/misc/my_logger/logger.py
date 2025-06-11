@@ -1,7 +1,5 @@
 import logging
-import os
 
-# os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
 logging.basicConfig(
     level=logging.INFO,
@@ -15,3 +13,6 @@ logging.basicConfig(
 
 logger = logging.getLogger("my_logger")
 print(logger)
+
+
+

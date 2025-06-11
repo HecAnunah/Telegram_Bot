@@ -1,8 +1,10 @@
 from bs4 import BeautifulSoup
 import requests
 from utils.misc.my_logger.logger import logger
+from utils.decorators.logger_decorator import logging_decoratos
 
 
+@logging_decoratos
 def text_gen(url):
     for i in range(1, 2):
         urls = url

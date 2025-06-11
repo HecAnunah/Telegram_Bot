@@ -9,10 +9,12 @@ from keyboards.reply.my_keyboard import request_contact
 from utils.misc.my_logger.logger import logger
 from utils.is_new import is_new
 from config_data.config import database_file_path
+from utils.decorators.logger_decorator import logging_decoratos
 
 
 @bot.message_handler(commands=["registry"])
-def starts_state(message: Message) -> None:
+@logging_decoratos
+def bot_starts_state(message: Message) -> None:
     bot.set_state(message.from_user.id, UserInfo.name)
     bot.send_message(
         message.chat.id,
@@ -21,10 +23,11 @@ def starts_state(message: Message) -> None:
 
 
 @bot.message_handler(state=UserInfo.name)
-def get_name(message: Message) -> None:
+@logging_decoratos
+def bot_get_name(message: Message) -> None:
     if message.text.isalpha():
-        bot.send_message(message.chat.id, f"Ваше имя записанно. Введите ваш возраст.")
-        bot.set_state(message.from_user.id, UserInfo.age)
+        bot.send_message(message.chat.id, f"Ваше имя записанно. Введите вашу фамилию.")
+        bot.set_state(message.from_user.id, UserInfo.surename)
 
         with bot.retrieve_data(message.from_user.id, message.chat.id) as data:
             data["name"] = message.text
@@ -32,58 +35,68 @@ def get_name(message: Message) -> None:
         bot.send_message(message.chat.id, f"Имя должно состоять из букв.")
 
 
-@bot.message_handler(state=UserInfo.age)
-def get_age(message: Message) -> None:
-    if message.text.isdigit():
-        bot.send_message(
-            message.chat.id, f"Ваш возраст записанн. Введите вашу страну проживания."
-        )
-        bot.set_state(message.from_user.id, UserInfo.country)
+@bot.message_handler(state=UserInfo.surename)
+@logging_decoratos
+def bot_get_age(message: Message) -> None:
+    if message.text.isalpha():
+        bot.send_message(message.chat.id, f"Фамилия записанна. Введите ваше отчество.")
+        bot.set_state(message.from_user.id, UserInfo.patronymic)
 
         with bot.retrieve_data(message.from_user.id, message.chat.id) as data:
-            data["age"] = message.text
+            data["surename"] = message.text
     else:
-        bot.send_message(message.chat.id, f"Возраст - только цифры.")
+        bot.send_message(message.chat.id, f"Фамилия должна состоять из букв.")
 
 
-@bot.message_handler(state=UserInfo.country)
-def get_country(message: Message) -> None:
-    bot.send_message(message.chat.id, f"Страну проживания записали. Введите город.")
-    bot.set_state(message.from_user.id, UserInfo.city)
+@bot.message_handler(state=UserInfo.patronymic)
+@logging_decoratos
+def bot_get_country(message: Message) -> None:
+    if message.text.isalpha():
+        bot.send_message(
+            message.chat.id,
+            f"Страну проживания записали. Введите ваш адресс проживания.",
+        )
+        bot.set_state(message.from_user.id, UserInfo.adress)
 
-    with bot.retrieve_data(message.from_user.id, message.chat.id) as data:
-        data["country"] = message.text
+        with bot.retrieve_data(message.from_user.id, message.chat.id) as data:
+            data["patronymic"] = message.text
+    else:
+        bot.send_message(message.chat.id, f"Отчество должно состоять из букв.")
 
 
-@bot.message_handler(state=UserInfo.city)
-def get_city(message: Message) -> None:
+@bot.message_handler(state=UserInfo.adress)
+@logging_decoratos
+def bot_get_city(message: Message) -> None:
     bot.send_message(
         message.chat.id,
-        f"Город проживания добавлен. Дайте разрешение на ваш номер телефона нажав на кнопку под строкой ввода.",
+        f"Адресс добавлен. Дайте разрешение на запись вашего номера телефона нажав на кнопку под строкой ввода.",
         reply_markup=request_contact(),
     )
     bot.set_state(message.from_user.id, UserInfo.phone_number)
 
     with bot.retrieve_data(message.from_user.id, message.chat.id) as data:
-        data["city"] = message.text
+        data["adress"] = message.text
 
 
 @bot.message_handler(content_types=["contact"], state=UserInfo.phone_number)
-def get_phone(message: Message) -> None:
+@logging_decoratos
+def bot_get_phone(message: Message) -> None:
     if message.content_type == "contact":
         with bot.retrieve_data(message.from_user.id, message.chat.id) as data:
             data["phone_number"] = message.contact.phone_number
 
             user_id = message.from_user.id
 
-            logger.info("Запуск записи фалйа в БД...")
+            logger.info("Запуск записи файла в БД...")
 
             # Читаем уже существующий файл БД
             try:
                 if os.path.exists(database_file_path):
                     with open(database_file_path, "r", encoding="utf-8") as file:
                         users_data = json.load(file)
-                        logger.info(f" JSON данные ДО обновления {users_data}")
+                        logger.info(
+                            f" JSON данные ДО обновления {users_data.get(str(user_id))}"
+                        )
                 else:
                     users_data = {}
             except Exception as e:
@@ -93,7 +106,7 @@ def get_phone(message: Message) -> None:
             is_new_user = is_new(message.from_user.id)
             # Данные нового пользователя или обновление данных уже существующего
             users_data[str(user_id)] = data
-            logger.info(f" JSON данные ПОСЛЕ обновления {users_data}")
+            logger.info(f" JSON данные ПОСЛЕ обновления {users_data.get(str(user_id))}")
 
             if is_new_user:
                 msg = "Поздравляем с регистрацией"

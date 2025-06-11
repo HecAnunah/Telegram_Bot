@@ -4,10 +4,12 @@ import os
 import json
 
 from config_data.config import database_file_path
+from utils.decorators.logger_decorator import logging_decoratos
 
 
 @bot.message_handler(commands=["registr_info"])
-def show_state(message: Message) -> None:
+@logging_decoratos
+def bot_show_state(message: Message) -> None:
 
     user_id = str(message.from_user.id)
 
@@ -31,9 +33,9 @@ def show_state(message: Message) -> None:
             text = (
                 f"📝 Сохранённые данные:\n"
                 f"👤 Имя: {user_data.get('name', 'не указано')}\n"
-                f"🎂 Возраст: {user_data.get('age', 'не указано')}\n"
-                f"🌍 Страна: {user_data.get('country', 'не указано')}\n"
-                f"🏙 Город: {user_data.get('city', 'не указано')}\n"
+                f"🎂 Возраст: {user_data.get('surename', 'не указано')}\n"
+                f"🌍 Страна: {user_data.get('patronymic', 'не указано')}\n"
+                f"🏙 Город: {user_data.get('adress', 'не указано')}\n"
                 f"📞 Телефон: {user_data.get('phone_number', 'не указано')}"
             )
             bot.send_message(message.chat.id, text)
