@@ -2,7 +2,7 @@ from bs4 import BeautifulSoup
 import requests
 from utils.misc.my_logger.logger import logger
 from utils.decorators.logger_decorator import logging_decoratos
-from utils.decorators.redis_cashe import use_redis
+from utils.redis_cashe import use_redis
 
 
 adress_info = {

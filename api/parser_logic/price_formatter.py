@@ -1,7 +1,7 @@
 from api.parser_logic.pars_logic_price import text_gen
 from config_data.config import urls
 from utils.decorators.logger_decorator import logging_decoratos
-from utils.decorators.redis_cashe import use_redis
+from utils.redis_cashe import use_redis
 
 
 @logging_decoratos

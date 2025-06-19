@@ -5,6 +5,7 @@ from api.parser_logic.pars_logic_info import info_getter
 from config_data.config import urls
 from utils.decorators.logger_decorator import logging_decoratos
 
+
 @bot.message_handler(commands=["info"])
 @logging_decoratos
 def bot_show_info(message: Message):

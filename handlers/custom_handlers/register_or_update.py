@@ -18,7 +18,7 @@ def bot_starts_state(message: Message) -> None:
     bot.set_state(message.from_user.id, UserInfo.name)
     bot.send_message(
         message.chat.id,
-        f"Здравствуйте, {message.from_user.first_name} введите ваше имя.",
+        f"Здравствуйте, введите ваше имя:",
     )
 
 
@@ -26,11 +26,11 @@ def bot_starts_state(message: Message) -> None:
 @logging_decoratos
 def bot_get_name(message: Message) -> None:
     if message.text.isalpha():
-        bot.send_message(message.chat.id, f"Ваше имя записанно. Введите вашу фамилию.")
-        bot.set_state(message.from_user.id, UserInfo.surename)
-
         with bot.retrieve_data(message.from_user.id, message.chat.id) as data:
             data["name"] = message.text
+
+        bot.send_message(message.chat.id, f"Введите вашу фамилию:")
+        bot.set_state(message.from_user.id, UserInfo.surename)
     else:
         bot.send_message(message.chat.id, f"Имя должно состоять из букв.")
 
@@ -39,11 +39,11 @@ def bot_get_name(message: Message) -> None:
 @logging_decoratos
 def bot_get_age(message: Message) -> None:
     if message.text.isalpha():
-        bot.send_message(message.chat.id, f"Фамилия записанна. Введите ваше отчество.")
-        bot.set_state(message.from_user.id, UserInfo.patronymic)
-
         with bot.retrieve_data(message.from_user.id, message.chat.id) as data:
             data["surename"] = message.text
+
+        bot.send_message(message.chat.id, f"Введите ваше отчество:")
+        bot.set_state(message.from_user.id, UserInfo.patronymic)
     else:
         bot.send_message(message.chat.id, f"Фамилия должна состоять из букв.")
 
@@ -52,14 +52,14 @@ def bot_get_age(message: Message) -> None:
 @logging_decoratos
 def bot_get_country(message: Message) -> None:
     if message.text.isalpha():
-        bot.send_message(
-            message.chat.id,
-            f"Страну проживания записали. Введите ваш адресс проживания.",
-        )
-        bot.set_state(message.from_user.id, UserInfo.adress)
-
         with bot.retrieve_data(message.from_user.id, message.chat.id) as data:
             data["patronymic"] = message.text
+
+        bot.send_message(
+            message.chat.id,
+            f"Введите ваш адрес проживания:",
+        )
+        bot.set_state(message.from_user.id, UserInfo.adress)
     else:
         bot.send_message(message.chat.id, f"Отчество должно состоять из букв.")
 
@@ -67,15 +67,15 @@ def bot_get_country(message: Message) -> None:
 @bot.message_handler(state=UserInfo.adress)
 @logging_decoratos
 def bot_get_city(message: Message) -> None:
+    with bot.retrieve_data(message.from_user.id, message.chat.id) as data:
+        data["adress"] = message.text
+
     bot.send_message(
         message.chat.id,
-        f"Адресс добавлен. Дайте разрешение на запись вашего номера телефона нажав на кнопку под строкой ввода.",
+        f"Для завершения регистрации необходимо подтвердить номер телефона кнопкой ниже.",
         reply_markup=request_contact(),
     )
     bot.set_state(message.from_user.id, UserInfo.phone_number)
-
-    with bot.retrieve_data(message.from_user.id, message.chat.id) as data:
-        data["adress"] = message.text
 
 
 @bot.message_handler(content_types=["contact"], state=UserInfo.phone_number)
@@ -86,7 +86,6 @@ def bot_get_phone(message: Message) -> None:
             data["phone_number"] = message.contact.phone_number
 
             user_id = message.from_user.id
-
             logger.info("Запуск записи файла в БД...")
 
             # Читаем уже существующий файл БД
@@ -103,7 +102,7 @@ def bot_get_phone(message: Message) -> None:
                 logger.warning(f"Ошибка чтения предыдущих записей BD: {e}")
                 users_data = {}
 
-            is_new_user = is_new(message.from_user.id)
+            is_new_user = is_new(user_id)
             # Данные нового пользователя или обновление данных уже существующего
             users_data[str(user_id)] = data
             logger.info(f" JSON данные ПОСЛЕ обновления {users_data.get(str(user_id))}")
@@ -114,6 +113,7 @@ def bot_get_phone(message: Message) -> None:
                 msg = "Вы успешно обновили данные"
 
             try:
+                logger.info("Начинаем обновление нашей БД...")
                 with open(database_file_path, "w", encoding="utf-8") as file:
                     json.dump(users_data, file, indent=4, ensure_ascii=False)
                     logger.info("Запись файла в БД успешна.")

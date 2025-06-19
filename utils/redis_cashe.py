@@ -19,10 +19,10 @@ def use_redis(ttl=300):
                 return cached
 
             logger.info("В КЭШе пусто. Возвращаю результат работы функции")
-            new_data = func(*args, **kwargs)
-            r.setex(cache_key, ttl, new_data)
+            new_cesh_data = func(*args, **kwargs)
+            r.setex(cache_key, ttl, new_cesh_data)
 
-            return new_data
+            return new_cesh_data
 
         return wrapper
 
