@@ -19,8 +19,3 @@ DEFAULT_COMMANDS = (
 )
 
 # Парсинг дата - перенес в api -> pars_logic
-
-
-# Путь к базе данных пользователя
-
-database_file_path = os.path.join(os.getcwd(), "database", "user_data.json")
