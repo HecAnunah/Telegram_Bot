@@ -1,1 +1,1 @@
-from . import my_logger
+from . import is_new

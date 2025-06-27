@@ -1,6 +1,6 @@
 from api.parser_logic.pars_logic_price import text_gen
 from config_data.config import urls
-from utils.decorators.logger_decorator import logging_decoratos
+from utils.my_logger.logger_decorator import logging_decoratos
 from utils.redis_cashe import use_redis
 
 

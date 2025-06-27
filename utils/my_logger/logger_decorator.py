@@ -1,4 +1,4 @@
-from utils.misc.my_logger.logger import logger
+from utils.my_logger.logger import logger
 from functools import wraps
 import types
 

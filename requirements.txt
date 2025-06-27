@@ -8,6 +8,7 @@ lxml==5.4.0
 mypy_extensions==1.1.0
 packaging==25.0
 pathspec==0.12.1
+peewee==3.15.4
 platformdirs==4.3.8
 pyTelegramBotAPI==4.27.0
 python-dotenv==1.1.0

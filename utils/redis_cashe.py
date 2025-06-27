@@ -1,7 +1,7 @@
 import redis
 import hashlib
 from functools import wraps
-from utils.misc.my_logger.logger import logger
+from utils.my_logger.logger import logger
 
 r = redis.Redis(host="localhost", port=6379, db=0, decode_responses=True)
 

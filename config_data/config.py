@@ -7,14 +7,14 @@ else:
     load_dotenv()
 
 BOT_TOKEN = os.getenv("BOT_TOKEN")
-RAPID_API_KEY = os.getenv("RAPID_API_KEY")
+DB_PATH = "database/clients.db"
 DEFAULT_COMMANDS = (
     ("start", "Запустить бота"),
     ("stop", "Остановть бота"),
     ("help", "Вывести справку"),
     ("info", "Вывести информацию о нас"),
     ("price", "Вывести Прайс-лист"),
-    ("registr_info", "Посмотреть Ваши регистрационные данные"),
+    ("user_info", "Посмотреть Ваши регистрационные данные"),
     ("registry", "Регистрация"),
 )
 

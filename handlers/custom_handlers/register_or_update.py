@@ -1,25 +1,35 @@
-from telebot.types import Message
+from telebot.types import Message, ReplyKeyboardRemove
 from loader import bot
-import os
-import json
+
 
 # Для состояний берем наш класс
 from states.user_state import UserInfo
 from keyboards.reply.my_keyboard import request_contact
-from utils.misc.my_logger.logger import logger
-from utils.is_new import is_new
-from config_data.config import database_file_path
-from utils.decorators.logger_decorator import logging_decoratos
+from keyboards.inline.update_reg import update_or_not
+from utils.my_logger.logger import logger
+from utils.my_logger.logger_decorator import logging_decoratos
+from database.peewe_model import Client
+from config_data.config import DEFAULT_COMMANDS
 
 
 @bot.message_handler(commands=["registry"])
 @logging_decoratos
 def bot_starts_state(message: Message) -> None:
-    bot.set_state(message.from_user.id, UserInfo.name)
-    bot.send_message(
-        message.chat.id,
-        f"Здравствуйте, введите ваше имя:",
-    )
+    if not Client.select().where(Client.user_id == message.from_user.id).exists():
+        bot.set_state(message.from_user.id, UserInfo.name)
+        bot.send_message(
+            message.chat.id,
+            f"Здравствуйте, введите ваше имя:",
+        )
+    else:
+        logger.info(
+            f"Пользователь с user_id={message.from_user.id} уже есть в базе данных. Отправляем клавиатуру Inline и предлагаем выбор"
+        )
+        bot.send_message(
+            message.from_user.id,
+            "Вы уже зарегестрированны. Обновить данные?",
+            reply_markup=update_or_not(),
+        )
 
 
 @bot.message_handler(state=UserInfo.name)
@@ -37,8 +47,8 @@ def bot_get_name(message: Message) -> None:
 
 @bot.message_handler(state=UserInfo.surename)
 @logging_decoratos
-def bot_get_age(message: Message) -> None:
-    if message.text.isalpha():
+def bot_get_surename(message: Message) -> None:
+    if message.text.replace("-", "").replace(" ", "").isalpha():
         with bot.retrieve_data(message.from_user.id, message.chat.id) as data:
             data["surename"] = message.text
 
@@ -85,45 +95,60 @@ def bot_get_phone(message: Message) -> None:
         with bot.retrieve_data(message.from_user.id, message.chat.id) as data:
             data["phone_number"] = message.contact.phone_number
 
-            user_id = message.from_user.id
+            # Удаляем клавиатуру
+            bot.send_message(
+                message.from_user.id,
+                "Спасибо. Телефон внесен в базу данных.",
+                reply_markup=ReplyKeyboardRemove(),
+            )
             logger.info("Запуск записи файла в БД...")
 
-            # Читаем уже существующий файл БД
-            try:
-                if os.path.exists(database_file_path):
-                    with open(database_file_path, "r", encoding="utf-8") as file:
-                        users_data = json.load(file)
-                        logger.info(
-                            f" JSON данные ДО обновления {users_data.get(str(user_id))}"
-                        )
-                else:
-                    users_data = {}
-            except Exception as e:
-                logger.warning(f"Ошибка чтения предыдущих записей BD: {e}")
-                users_data = {}
+            # Выбираем что делать или обновить данные пользователя или создать нового.
+            if Client.select().where(Client.user_id == message.from_user.id).exists():
+                Client.update(
+                    name=data["name"],
+                    surename=data["surename"],
+                    patronymic=data["patronymic"],
+                    adress=data["adress"],
+                    phone_number=data["phone_number"],
+                ).where(Client.user_id == message.from_user.id).execute()
 
-            is_new_user = is_new(user_id)
-            # Данные нового пользователя или обновление данных уже существующего
-            users_data[str(user_id)] = data
-            logger.info(f" JSON данные ПОСЛЕ обновления {users_data.get(str(user_id))}")
-
-            if is_new_user:
-                msg = "Поздравляем с регистрацией"
+                logger.info(
+                    f"Пользователь {message.from_user.id} успешно обновил данные."
+                )
+                bot.send_message(message.from_user.id, "Вы успешно обновили данные!")
             else:
-                msg = "Вы успешно обновили данные"
+                Client.create(
+                    user_id=message.from_user.id,
+                    name=data["name"],
+                    surename=data["surename"],
+                    patronymic=data["patronymic"],
+                    adress=data["adress"],
+                    phone_number=data["phone_number"],
+                )
+                logger.info(f"Пользователь {message.from_user.id} прошел регистрацию.")
+                bot.send_message(message.from_user.id, "Регистрация завершена!")
 
-            try:
-                logger.info("Начинаем обновление нашей БД...")
-                with open(database_file_path, "w", encoding="utf-8") as file:
-                    json.dump(users_data, file, indent=4, ensure_ascii=False)
-                    logger.info("Запись файла в БД успешна.")
-            except Exception as e:
-                logger.warning(f"Ошибка при записи файла в JSON  {e}")
-
-        bot.send_message(
-            message.chat.id,
-            f"Ваш номер {data['phone_number']} записан. {msg}.",
-        )
         bot.delete_state(message.from_user.id, message.chat.id)
     else:
         bot.send_message(message.from_user.id, f"Нужно подтвердит отправку номера.")
+        bot.delete_state(message.from_user.id, message.chat.id)
+
+
+# Обрабатываем ответ ДА Inline клавиатуры
+@bot.callback_query_handler(func=lambda callback_query: callback_query.data == "yes")
+def yes_answer(callback_query):
+    # Удаляем клавиату
+    bot.edit_message_reply_markup(
+        callback_query.from_user.id, callback_query.message.message_id
+    )
+    bot.set_state(callback_query.from_user.id, UserInfo.name)
+    bot.send_message(callback_query.message.chat.id, "Введите свое имя.")
+
+
+# Обрабатываем ответ НЕТ Inline клавиатуры
+@bot.callback_query_handler(func=lambda callback_query: callback_query.data == "no")
+def no_answer(callback_query):
+    bot.delete_state(callback_query.from_user.id, callback_query.message.chat.id)
+    menu = [f"/{command} - {commit}" for command, commit in DEFAULT_COMMANDS]
+    bot.send_message(callback_query.from_user.id, "\n".join(menu))

@@ -1,7 +1,7 @@
 from bs4 import BeautifulSoup
 import requests
-from utils.misc.my_logger.logger import logger
-from utils.decorators.logger_decorator import logging_decoratos
+from utils.my_logger.logger import logger
+from utils.my_logger.logger_decorator import logging_decoratos
 
 
 @logging_decoratos

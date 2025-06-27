@@ -2,7 +2,7 @@ from telebot.types import Message
 
 from config_data.config import DEFAULT_COMMANDS
 from loader import bot
-from utils.decorators.logger_decorator import logging_decoratos
+from utils.my_logger.logger_decorator import logging_decoratos
 
 
 @bot.message_handler(commands=["help"])

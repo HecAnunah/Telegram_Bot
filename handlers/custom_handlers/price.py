@@ -1,7 +1,8 @@
 from telebot.types import Message
 from loader import bot
 from api.parser_logic.price_formatter import price_formatter
-from utils.decorators.logger_decorator import logging_decoratos
+from utils.my_logger.logger_decorator import logging_decoratos
+
 
 @bot.message_handler(commands=["price"])
 @logging_decoratos
