@@ -18,11 +18,8 @@ DEFAULT_COMMANDS = (
     ("registry", "Регистрация"),
 )
 
-# Парсинг дата
-urls = [
-    r"http://www.vetsimba.ru/price/price.html",
-    r"http://www.vetsimba.ru/index.html",
-]
+# Парсинг дата - перенес в api -> pars_logic
+
 
 # Путь к базе данных пользователя
 

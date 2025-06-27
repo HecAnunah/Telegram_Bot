@@ -5,11 +5,11 @@ from utils.my_logger.logger_decorator import logging_decoratos
 
 
 @logging_decoratos
-def text_gen(url):
+def price_gen():
     for i in range(1, 2):
-        urls = url
+        url = r"http://www.vetsimba.ru/price/price.html"
         logger.info(f"Первый блок: делаю запрос request по {url}")
-        response = requests.get(urls)
+        response = requests.get(url)
         if 200 <= response.status_code <= 400:
             logger.info("URL запрос успешен. Форматирую данные...")
             bs4 = BeautifulSoup(response.content, "lxml")
