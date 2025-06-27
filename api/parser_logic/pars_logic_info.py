@@ -13,7 +13,8 @@ adress_info = {
 
 @logging_decoratos
 @use_redis(300)
-def info_getter(url):
+def info_getter():
+    url = r"http://www.vetsimba.ru/index.html"
     response = requests.get(url)
     logger.info(f"Делаю запрос по URL {url}")
     if 200 <= response.status_code <= 400:
