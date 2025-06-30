@@ -1,3 +1,4 @@
+from typing import Generator
 from bs4 import BeautifulSoup
 import requests
 from utils.my_logger.logger import logger
@@ -5,7 +6,16 @@ from utils.my_logger.logger_decorator import logging_decoratos
 
 
 @logging_decoratos
-def price_gen():
+def price_gen() -> Generator[str, None, None]:
+    """
+    Парсит HTML-страницу с прайсом и генерирует строки вида "услуга цена".
+
+    Делает запрос к странице с таблицей цен, извлекает услуги и соответствующие цены
+    из первой таблицы и возвращает их построчно.
+
+    Yields:
+        str: строка с названием услуги и ценой, разделённые пробелом.
+    """
     for i in range(1, 2):
         url = r"http://www.vetsimba.ru/price/price.html"
         logger.info(f"Первый блок: делаю запрос request по {url}")

@@ -10,6 +10,17 @@ from utils.my_logger.logger import logger
 @bot.message_handler(commands=["start"])
 @logging_decoratos
 def bot_start(message: Message):
+    """
+    Обрабатывает команду /start
+    Выводит данные о погоде
+    Выводит список команд для бота
+
+    Args:
+        message (Message): объект сообщения от пользователя
+
+    Returns:
+        None
+    """
     try:
         bot.reply_to(
             message, f"Привет, {message.from_user.first_name}.\n{get_weather()}"

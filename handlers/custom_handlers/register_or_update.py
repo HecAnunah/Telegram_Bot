@@ -1,4 +1,4 @@
-from telebot.types import Message, ReplyKeyboardRemove
+from telebot.types import Message, ReplyKeyboardRemove, CallbackQuery
 from loader import bot
 
 
@@ -15,6 +15,16 @@ from config_data.config import DEFAULT_COMMANDS
 @bot.message_handler(commands=["registry"])
 @logging_decoratos
 def bot_starts_state(message: Message) -> None:
+    """
+    Хэндлер для обработки запроса /registry - проводит регистрацию нового пользователя или обновление данных уже зарегестрированных пользователей
+
+    Args:
+        message (Message): объект сообщения от пользователя
+
+    Returns:
+        None
+
+    """
     if not Client.select().where(Client.user_id == message.from_user.id).exists():
         bot.set_state(message.from_user.id, UserInfo.name)
         bot.send_message(
@@ -35,6 +45,10 @@ def bot_starts_state(message: Message) -> None:
 @bot.message_handler(state=UserInfo.name)
 @logging_decoratos
 def bot_get_name(message: Message) -> None:
+    """
+    Обрабатывает ввод имени пользователя.
+    Проверяет, что имя состоит только из букв.
+    """
     if message.text.isalpha():
         with bot.retrieve_data(message.from_user.id, message.chat.id) as data:
             data["name"] = message.text
@@ -48,6 +62,11 @@ def bot_get_name(message: Message) -> None:
 @bot.message_handler(state=UserInfo.surename)
 @logging_decoratos
 def bot_get_surename(message: Message) -> None:
+    """
+    Обрабатывает фамилию пользователя
+    Проверяет что-бы фамилия была только из букв
+    Поддерживает формат ввода двусоставных фамилий
+    """
     if message.text.replace("-", "").replace(" ", "").isalpha():
         with bot.retrieve_data(message.from_user.id, message.chat.id) as data:
             data["surename"] = message.text
@@ -61,6 +80,10 @@ def bot_get_surename(message: Message) -> None:
 @bot.message_handler(state=UserInfo.patronymic)
 @logging_decoratos
 def bot_get_country(message: Message) -> None:
+    """
+    Обрабатывает отчество пользователя
+    Проверяет что бы оно состояло только из букв
+    """
     if message.text.isalpha():
         with bot.retrieve_data(message.from_user.id, message.chat.id) as data:
             data["patronymic"] = message.text
@@ -77,6 +100,9 @@ def bot_get_country(message: Message) -> None:
 @bot.message_handler(state=UserInfo.adress)
 @logging_decoratos
 def bot_get_city(message: Message) -> None:
+    """
+    Обрабатывает адресс пользователя
+    """
     with bot.retrieve_data(message.from_user.id, message.chat.id) as data:
         data["adress"] = message.text
 
@@ -91,6 +117,11 @@ def bot_get_city(message: Message) -> None:
 @bot.message_handler(content_types=["contact"], state=UserInfo.phone_number)
 @logging_decoratos
 def bot_get_phone(message: Message) -> None:
+    """
+    Обрабатывает контактный номер пользователя
+    Записывает в базу данных SQLite3 данные пользователя
+    Или Обновляет данные в базе если они там уже есть
+    """
     if message.content_type == "contact":
         with bot.retrieve_data(message.from_user.id, message.chat.id) as data:
             data["phone_number"] = message.contact.phone_number
@@ -137,7 +168,11 @@ def bot_get_phone(message: Message) -> None:
 
 # Обрабатываем ответ ДА Inline клавиатуры
 @bot.callback_query_handler(func=lambda callback_query: callback_query.data == "yes")
-def yes_answer(callback_query):
+def yes_answer(callback_query: CallbackQuery) -> None:
+    """
+    Обрабатывает callback_query == 'yes' с Inline клавиатуры
+    Присваивает Status пользавателя UserInfo.name
+    """
     # Удаляем клавиату
     bot.edit_message_reply_markup(
         callback_query.from_user.id, callback_query.message.message_id
@@ -148,7 +183,11 @@ def yes_answer(callback_query):
 
 # Обрабатываем ответ НЕТ Inline клавиатуры
 @bot.callback_query_handler(func=lambda callback_query: callback_query.data == "no")
-def no_answer(callback_query):
+def no_answer(callback_query: CallbackQuery) -> None:
+    """
+    Обрабатывает callback_query == 'no' с Inline клавиатуры
+    Выводит меню команд пользователю
+    """
     bot.delete_state(callback_query.from_user.id, callback_query.message.chat.id)
     menu = [f"/{command} - {commit}" for command, commit in DEFAULT_COMMANDS]
     bot.send_message(callback_query.from_user.id, "\n".join(menu))

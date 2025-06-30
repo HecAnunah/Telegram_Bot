@@ -6,7 +6,17 @@ from utils.my_logger.logger_decorator import logging_decoratos
 
 @bot.message_handler(commands=["price"])
 @logging_decoratos
-def bot_show_price(message: Message):
+def bot_show_price(message: Message) -> None:
+    """
+    Хэндлер для обработки запроса /price - отправляет пользователю сообщения типа цена-услуга
+
+    Args:
+        message (Message): объект сообщения от пользователя
+
+    Returns:
+        None
+
+    """
     text = price_formatter()
 
     if len(text) > 4000:
