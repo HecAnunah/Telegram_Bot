@@ -1,7 +1,10 @@
 import openai
 from loader import bot
 from telebot.types import Message
+
+# ключ скорее всего ограницен кол-вом запросов
 from config_data.config import OPEN_AI_KEY
+
 from utils.my_logger.logger import logging
 from states.user_state import ChatAI
 
