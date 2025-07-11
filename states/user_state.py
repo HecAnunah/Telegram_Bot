@@ -1,6 +1,17 @@
 from telebot.handler_backends import State, StatesGroup
 
 
+class ChatAI(StatesGroup):
+    """
+    Класс состояния для поддержки АИ.
+
+    Атрибуты:
+        ai_state (State): состояние нахождения в диалоге с АИ.
+    """
+
+    ai_state = State()
+
+
 class UserInfo(StatesGroup):
     """
     Класс состояний пользователя для процесса регистрации.
