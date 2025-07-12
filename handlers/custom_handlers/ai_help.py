@@ -18,7 +18,7 @@ def user_from_ai(message: Message) -> None:
         data["history"] = [
             {
                 "role": "system",
-                "content": "Ты вежливый помощник-врач для ветеринарной клиники.",
+                "content": "Ты вежливый помощник.",
             }
         ]
     bot.send_message(message.chat.id, "Задайте ваш вопрос ИИ: ")
