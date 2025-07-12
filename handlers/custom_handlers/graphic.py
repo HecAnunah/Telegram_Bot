@@ -4,7 +4,7 @@ import pandas
 from utils.my_logger.logger import logging
 
 
-@bot.message_handler(commands="/graphic")
+@bot.message_handler(commands=["works"])
 def works_date(message: Message) -> None:
     try:
         file_zp = pandas.read_excel("solary.xlsx", header=None)
@@ -21,7 +21,9 @@ def works_date(message: Message) -> None:
                 if str(values) == "+":
                     works_date.append(str(i))
 
-            line = f"{name} {' '.join(works_date)}"
+            line = f"<b>{name}</b>: {', '.join(works_date)}"
             graphics.append(line)
-    result = "\n".join(graphics)
-    return result
+
+    month = "<b>График работы вет. клиники Симба на Июль</b>\n"
+    result = month + "\n".join(graphics)
+    bot.send_message(message.chat.id, result, parse_mode="HTML")

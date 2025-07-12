@@ -15,7 +15,7 @@ OPEN_AI_KEY: str = os.getenv("OPEN_AI_KEY")
 DB_PATH: str = "database/clients.db"
 DEFAULT_COMMANDS: Tuple[Tuple[str, str], ...] = (
     ("start", "Запустить бота"),
-    ("stop", "Остановить бота"),
+    ("works", "Даты работы врачей"),
     ("help", "Вывести справку"),
     ("info", "Вывести информацию о нас"),
     ("price", "Вывести Прайс-лист"),

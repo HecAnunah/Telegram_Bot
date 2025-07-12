@@ -34,8 +34,8 @@ def process_handler(message: Message) -> None:
     with bot.retrieve_data(message.from_user.id, message.chat.id) as data:
         messages = data.get("history", [])
         messages.append({"role": "user", "content": message.text})
+        logging.info(f"Вопрос пользователя: {message.text}")
 
-    bot.send_message(message.chat.id, f"Обрабатываю запрос...")
     try:
         response = client.chat.completions.create(
             model="openai/gpt-3.5-turbo-0613",  # или gpt-4, если у тебя есть доступ
@@ -43,6 +43,7 @@ def process_handler(message: Message) -> None:
         )
 
         answer = response.choices[0].message.content
+        logging.info(f"Ответ бота: {answer}")
         bot.send_message(message.chat.id, f"{answer}")
 
     except Exception as exc:
