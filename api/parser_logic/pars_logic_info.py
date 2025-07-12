@@ -49,6 +49,6 @@ def info_getter() -> str:
             return result
     except Exception as exc:
         logger.info(
-            f"По время парсинга страницы: http://www.vetsimba.ru/index.html появилась ошибка: {exc} "
+            f"Во время парсинга страницы: http://www.vetsimba.ru/index.html появилась ошибка: {exc} "
         )
         return "Произошла ошибка в функции info_getter() при получении информации о клинике."
